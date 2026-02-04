@@ -6,21 +6,17 @@
     <title>TripJack Expert Challenge</title>
     <style>
         :root { --tj-blue: #00529b; --tj-orange: #f37021; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
-        #main-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; border-top: 8px solid var(--tj-blue); position: relative; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        #main-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; border-top: 8px solid var(--tj-blue); position: relative; min-height: 300px; }
         .logo { font-weight: bold; color: var(--tj-blue); font-size: 28px; margin-bottom: 20px; }
         .logo span { color: var(--tj-orange); }
-        input { width: 90%; padding: 12px; margin: 10px 0; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
         #timer { font-size: 1.2rem; color: #e74c3c; font-weight: bold; margin-bottom: 20px; }
-        .option { display: block; width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.3s; background: white; font-size: 16px; }
+        .option { display: block; width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.3s; background: white; font-size: 16px; text-align: center; }
         .option:hover { border-color: var(--tj-blue); background: #f0f7ff; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         .tj-btn { background: var(--tj-orange); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 18px; width: 100%; margin-top: 10px; }
-        
-        /* Countdown Overlay Style */
-        #countdown-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; justify-content: center; align-items: center; border-radius: 15px; z-index: 10; }
-        #countdown-number { font-size: 80px; font-weight: bold; color: var(--tj-blue); animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        #countdown-number { font-size: 80px; font-weight: bold; color: var(--tj-blue); }
     </style>
 </head>
 <body>
@@ -30,27 +26,27 @@
 
     <div id="lead-screen">
         <h3>Agent Challenge</h3>
-        <p>Enter your details to start and win TJ Rewards!</p>
-        <input type="text" id="agentName" placeholder="Full Name" required>
-        <input type="email" id="agentEmail" placeholder="Email ID" required>
-        <button class="tj-btn" onclick="preStart()">Start Quiz</button>
+        <p>Enter details to start & win!</p>
+        <input type="text" id="agentName" placeholder="Full Name">
+        <input type="email" id="agentEmail" placeholder="Email ID">
+        <button class="tj-btn" onclick="runCountdown()">Start Quiz</button>
     </div>
 
-    <div id="countdown-overlay" class="hidden">
+    <div id="countdown-screen" class="hidden">
         <div id="countdown-number">3</div>
     </div>
 
     <div id="quiz-screen" class="hidden">
         <div id="timer">Time Left: <span id="time">25</span>s</div>
-        <h3 id="question-text">Loading...</h3>
+        <h3 id="question-text"></h3>
         <div id="options-container"></div>
     </div>
 
     <div id="result-screen" class="hidden">
         <h2>Quiz Complete!</h2>
         <p style="font-size: 48px; margin: 10px 0;">🎯 <span id="final-score">0</span>/5</p>
-        <p id="reward-msg">Sending your score...</p>
-        <button class="tj-btn" onclick="location.reload()">Finish</button>
+        <p id="reward-msg">Saving your score...</p>
+        <button class="tj-btn" onclick="window.location.reload()">Finish</button>
     </div>
 </div>
 
@@ -68,14 +64,14 @@
     let currentQ = 0; let score = 0; let timeLeft = 25; let timer;
     let agentName = ""; let agentEmail = "";
 
-    function preStart() {
+    function runCountdown() {
         agentName = document.getElementById('agentName').value;
         agentEmail = document.getElementById('agentEmail').value;
 
         if(!agentName || !agentEmail) { alert("Please fill in your details!"); return; }
 
         document.getElementById('lead-screen').classList.add('hidden');
-        document.getElementById('countdown-overlay').classList.remove('hidden');
+        document.getElementById('countdown-screen').classList.remove('hidden');
         
         let count = 3;
         const countInterval = setInterval(() => {
@@ -92,18 +88,16 @@
     }
 
     function startQuiz() {
-        document.getElementById('countdown-overlay').classList.add('hidden');
+        document.getElementById('countdown-screen').classList.add('hidden');
         document.getElementById('quiz-screen').classList.remove('hidden');
         loadQuestion();
-        startTimer();
+        timer = setInterval(updateTimer, 1000);
     }
 
-    function startTimer() {
-        timer = setInterval(() => {
-            timeLeft--;
-            document.getElementById('time').innerText = timeLeft;
-            if (timeLeft <= 0) endQuiz();
-        }, 1000);
+    function updateTimer() {
+        timeLeft--;
+        document.getElementById('time').innerText = timeLeft;
+        if (timeLeft <= 0) endQuiz();
     }
 
     function loadQuestion() {
@@ -116,28 +110,33 @@
             const btn = document.createElement('button');
             btn.className = 'option';
             btn.innerText = opt;
-            btn.onclick = () => { if(i === data.correct) score++; currentQ++; loadQuestion(); };
+            btn.onclick = () => { 
+                if(i === data.correct) score++; 
+                currentQ++; 
+                loadQuestion(); 
+            };
             container.appendChild(btn);
         });
     }
 
-    async function endQuiz() {
+    function endQuiz() {
         clearInterval(timer);
         document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('final-score').innerText = score;
 
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: agentName, email: agentEmail, score: score })
-            });
-            document.getElementById('reward-msg').innerText = score >= 4 ? "🔥 AMAZING! Show this for 2 SPINS!" : "Good job! Show this for 1 SPIN!";
-        } catch (e) {
-            document.getElementById('reward-msg').innerText = "Score saved! Show this for your spin.";
-        }
+        const resultData = { name: agentName, email: agentEmail, score: score };
+
+        // Optimized fetch for Google Apps Script
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(resultData)
+        });
+
+        document.getElementById('reward-msg').innerText = score >= 4 ? "🔥 AMAZING! Show this for 2 SPINS!" : "Good job! Show this for 1 SPIN!";
     }
 </script>
 </body>
