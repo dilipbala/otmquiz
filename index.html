@@ -3,20 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TripJack Expert Challenge</title>
+    <title>TripJack Expert Challenge | OTM 2026</title>
     <style>
         :root { --tj-blue: #00529b; --tj-orange: #f37021; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
-        #main-card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; border-top: 8px solid var(--tj-blue); position: relative; min-height: 300px; }
-        .logo { font-weight: bold; color: var(--tj-blue); font-size: 28px; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        
+        #main-card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); width: 90%; max-width: 450px; text-align: center; border-top: 10px solid var(--tj-blue); position: relative; min-height: 520px; display: flex; flex-direction: column; justify-content: center; }
+        
+        .logo { font-weight: bold; color: var(--tj-blue); font-size: 32px; margin-bottom: 10px; }
         .logo span { color: var(--tj-orange); }
-        input { width: 90%; padding: 12px; margin: 10px 0; border: 1.5px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-        #timer { font-size: 1.2rem; color: #e74c3c; font-weight: bold; margin-bottom: 20px; }
-        .option { display: block; width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.3s; background: white; font-size: 16px; text-align: center; }
+        
+        /* PANIC TIMER */
+        #timer-container { margin-bottom: 10px; height: 100px; display: flex; justify-content: center; align-items: center; }
+        #timer { font-size: 90px; font-weight: 900; color: #333; transition: all 0.2s ease; line-height: 1; }
+        .timer-low { color: #e74c3c !important; animation: panic 0.4s infinite; }
+        @keyframes panic { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+        h2 { color: #2c3e50; margin: 0 0 10px 0; }
+        p { color: #7f8c8d; margin-bottom: 20px; }
+
+        input { width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
+        input:focus { border-color: var(--tj-blue); }
+
+        .option { display: block; width: 100%; padding: 16px; margin: 12px 0; border: 2px solid #eee; border-radius: 15px; cursor: pointer; transition: 0.2s; background: #fff; font-size: 18px; font-weight: 500; text-align: center; color: #34495e; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .option:hover { border-color: var(--tj-blue); background: #f0f7ff; }
+        .option:active { transform: scale(0.96); }
+        
         .hidden { display: none !important; }
-        .tj-btn { background: var(--tj-orange); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 18px; width: 100%; margin-top: 10px; }
-        #countdown-number { font-size: 80px; font-weight: bold; color: var(--tj-blue); }
+        
+        .tj-btn { background: var(--tj-orange); color: white; border: none; padding: 20px 30px; border-radius: 35px; font-weight: bold; cursor: pointer; font-size: 20px; width: 100%; margin-top: 15px; box-shadow: 0 5px 15px rgba(243, 112, 33, 0.4); text-transform: uppercase; letter-spacing: 1px; }
+        .tj-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+
+        #countdown-number { font-size: 130px; font-weight: 900; color: var(--tj-blue); }
+        #question-text { font-size: 22px; color: #2c3e50; margin-bottom: 25px; min-height: 60px; font-weight: 600; line-height: 1.3; }
+        
+        .result-score { font-size: 100px; font-weight: 900; color: var(--tj-blue); margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -25,11 +46,13 @@
     <div class="logo">Trip<span>Jack</span></div>
 
     <div id="lead-screen">
-        <h3>Agent Challenge</h3>
-        <p>Enter details to start & win!</p>
-        <input type="text" id="agentName" placeholder="Full Name">
-        <input type="email" id="agentEmail" placeholder="Email ID">
-        <button class="tj-btn" onclick="runCountdown()">Start Quiz</button>
+        <h2>Expert Challenge</h2>
+        <p>Take the 5-question blitz & win!</p>
+        <input type="text" id="agentName" placeholder="Full Name (Required)">
+        <input type="email" id="agentEmail" placeholder="Email ID (Required)">
+        <input type="text" id="agencyId" placeholder="Agency ID (Optional)">
+        <button class="tj-btn" id="start-btn" onclick="runCountdown()" disabled>Loading...</button>
+        <p id="loading-msg" style="font-size: 12px; margin-top: 15px;">Connecting to TripJack Servers...</p>
     </div>
 
     <div id="countdown-screen" class="hidden">
@@ -37,75 +60,98 @@
     </div>
 
     <div id="quiz-screen" class="hidden">
-        <div id="timer">Time Left: <span id="time">25</span>s</div>
-        <h3 id="question-text"></h3>
+        <div id="timer-container">
+            <span id="timer">25</span>
+        </div>
+        <div id="question-text"></div>
         <div id="options-container"></div>
     </div>
 
     <div id="result-screen" class="hidden">
-        <h2>Quiz Complete!</h2>
-        <p style="font-size: 48px; margin: 10px 0;">🎯 <span id="final-score">0</span>/5</p>
-        <p id="reward-msg">Saving your score...</p>
-        <button class="tj-btn" onclick="window.location.reload()">Finish</button>
+        <h2>Challenge Complete!</h2>
+        <div class="result-score"><span id="final-score">0</span><span style="font-size: 30px; color: #ccc;">/5</span></div>
+        <p id="reward-msg" style="font-size: 22px; font-weight: bold; color: var(--tj-orange);"></p>
+        <p style="font-size: 14px;">Show this screen to the TripJack team for your spin!</p>
+        <button class="tj-btn" onclick="window.location.reload()">Back to Home</button>
     </div>
 </div>
 
 <script>
+    // YOUR DEPLOYED GOOGLE APPS SCRIPT URL
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyLoMA6vMbfdFT4OM6hHyCJORbm9-Vw7-k7iPNT3_BsaN-bjkK1yqNdp0JQGIqUvUdW/exec';
     
-    const quizData = [
-        { q: "How many airlines are available on TripJack?", a: ["500+", "750+", "900+", "1000+"], correct: 1 },
-        { q: "Which guarantee ensures no hotel check-in issues?", a: ["Price Lock", "Check-In Guarantee", "TJ Secure", "Hotel Guard"], correct: 1 },
-        { q: "What is TripJack's primary focus for agents?", a: ["Only Flights", "One-stop Tech Solution", "Offline Bookings", "Social Media"], correct: 1 },
-        { q: "Can you manage cancellations in 'One-Click'?", a: ["Yes", "No", "Only for Hotels", "Only for Flights"], correct: 0 },
-        { q: "Which cities does TripJack empower specifically?", a: ["Metro Only", "Tier-2 & Tier-3", "International only", "None"], correct: 1 }
-    ];
+    let quizData = [];
+    let currentQ = 0, score = 0, timeLeft = 25, timerInterval;
+    let agentName = "", agentEmail = "", agencyId = "";
 
-    let currentQ = 0; let score = 0; let timeLeft = 25; let timer;
-    let agentName = ""; let agentEmail = "";
+    // 1. Fetch random questions on load
+    async function fetchQuestions() {
+        try {
+            const response = await fetch(SCRIPT_URL);
+            quizData = await response.json();
+            if(quizData.error) throw new Error();
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('start-btn').innerText = "START QUIZ";
+            document.getElementById('loading-msg').innerText = "Question Bank Ready!";
+        } catch (e) {
+            document.getElementById('loading-msg').innerText = "Sync Error. Please refresh the page.";
+            document.getElementById('loading-msg').style.color = "red";
+        }
+    }
+    fetchQuestions();
 
+    // 2. Initial Countdown logic
     function runCountdown() {
-        agentName = document.getElementById('agentName').value;
-        agentEmail = document.getElementById('agentEmail').value;
+        agentName = document.getElementById('agentName').value.trim();
+        agentEmail = document.getElementById('agentEmail').value.trim();
+        agencyId = document.getElementById('agencyId').value.trim() || "N/A";
 
-        if(!agentName || !agentEmail) { alert("Please fill in your details!"); return; }
+        if(!agentName || !agentEmail) { 
+            alert("Name and Email are required to play!"); 
+            return; 
+        }
 
         document.getElementById('lead-screen').classList.add('hidden');
         document.getElementById('countdown-screen').classList.remove('hidden');
         
         let count = 3;
-        const countInterval = setInterval(() => {
+        const countInt = setInterval(() => {
             count--;
             if (count > 0) {
                 document.getElementById('countdown-number').innerText = count;
             } else if (count === 0) {
                 document.getElementById('countdown-number').innerText = "GO!";
             } else {
-                clearInterval(countInterval);
+                clearInterval(countInt);
                 startQuiz();
             }
         }, 1000);
     }
 
+    // 3. Start Quiz & Timer
     function startQuiz() {
         document.getElementById('countdown-screen').classList.add('hidden');
         document.getElementById('quiz-screen').classList.remove('hidden');
         loadQuestion();
-        timer = setInterval(updateTimer, 1000);
+        timerInterval = setInterval(updateTimer, 1000);
     }
 
     function updateTimer() {
         timeLeft--;
-        document.getElementById('time').innerText = timeLeft;
+        const timerDisplay = document.getElementById('timer');
+        timerDisplay.innerText = timeLeft;
+        if (timeLeft <= 10) timerDisplay.classList.add('timer-low');
         if (timeLeft <= 0) endQuiz();
     }
 
+    // 4. Load individual questions
     function loadQuestion() {
         if (currentQ >= quizData.length) return endQuiz();
         const data = quizData[currentQ];
         document.getElementById('question-text').innerText = data.q;
         const container = document.getElementById('options-container');
         container.innerHTML = '';
+        
         data.a.forEach((opt, i) => {
             const btn = document.createElement('button');
             btn.className = 'option';
@@ -119,24 +165,28 @@
         });
     }
 
+    // 5. End and Save Data
     function endQuiz() {
-        clearInterval(timer);
+        clearInterval(timerInterval);
         document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('final-score').innerText = score;
 
-        const resultData = { name: agentName, email: agentEmail, score: score };
-
-        // Optimized fetch for Google Apps Script
+        // Post Lead Data + Score to Google Sheet
         fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
-            cache: 'no-cache',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(resultData)
+            body: JSON.stringify({ 
+                name: agentName, 
+                email: agentEmail, 
+                agencyId: agencyId, 
+                score: score 
+            })
         });
 
-        document.getElementById('reward-msg').innerText = score >= 4 ? "🔥 AMAZING! Show this for 2 SPINS!" : "Good job! Show this for 1 SPIN!";
+        // Dynamic Reward Message
+        const rewardMsg = score >= 4 ? "🏆 TRIPJACK PRO: 2 SPINS!" : "WELL PLAYED: 1 SPIN!";
+        document.getElementById('reward-msg').innerText = rewardMsg;
     }
 </script>
 </body>
