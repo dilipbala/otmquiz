@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripJack Live Leaderboard</title>
+    <style>
+        :root { --tj-blue: #00529b; --tj-orange: #f37021; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a192f; color: white; margin: 0; padding: 20px; text-align: center; overflow: hidden; }
+        
+        .header { margin-bottom: 30px; animation: fadeInDown 1s; }
+        .logo { font-size: 40px; font-weight: bold; }
+        .logo span { color: var(--tj-orange); }
+        h1 { font-size: 50px; text-transform: uppercase; letter-spacing: 5px; margin: 10px 0; color: #fff; text-shadow: 0 0 20px rgba(243,112,33,0.6); }
+
+        #leaderboard-list { max-width: 800px; margin: 0 auto; list-style: none; padding: 0; }
+        
+        .entry { background: rgba(255, 255, 255, 0.05); margin: 10px 0; padding: 15px 30px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--tj-blue); transition: all 0.5s ease; animation: slideIn 0.5s forwards; }
+        
+        /* Highlight Top 3 */
+        .entry:nth-child(1) { border-left-color: #ffd700; background: rgba(255, 215, 0, 0.1); transform: scale(1.05); }
+        .entry:nth-child(2) { border-left-color: #c0c0c0; background: rgba(192, 192, 192, 0.1); }
+        .entry:nth-child(3) { border-left-color: #cd7f32; background: rgba(205, 127, 50, 0.1); }
+
+        .rank { font-size: 24px; font-weight: bold; width: 50px; text-align: left; }
+        .name { font-size: 28px; flex-grow: 1; text-align: left; margin-left: 20px; }
+        .score { font-size: 32px; font-weight: 900; color: var(--tj-orange); }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Floating background elements for "Graphics" */
+        .bg-circle { position: absolute; border-radius: 50%; background: var(--tj-blue); filter: blur(80px); opacity: 0.2; z-index: -1; }
+    </style>
+</head>
+<body>
+    <div class="bg-circle" style="width: 400px; height: 400px; top: -100px; left: -100px;"></div>
+    <div class="bg-circle" style="width: 300px; height: 300px; bottom: -50px; right: -50px;"></div>
+
+    <div class="header">
+        <div class="logo">Trip<span>Jack</span></div>
+        <h1>TOP 10 EXPERTS</h1>
+        <p style="font-size: 20px; color: #aaa;">Live Updates from the Floor</p>
+    </div>
+
+    <div id="leaderboard-list">
+        </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyLoMA6vMbfdFT4OM6hHyCJORbm9-Vw7-k7iPNT3_BsaN-bjkK1yqNdp0JQGIqUvUdW/exec?get=leaderboard';
+
+        async function updateLeaderboard() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                const list = document.getElementById('leaderboard-list');
+                
+                list.innerHTML = data.map((item, index) => `
+                    <li class="entry">
+                        <span class="rank">#${index + 1}</span>
+                        <span class="name">${item.name}</span>
+                        <span class="score">${item.score}/5</span>
+                    </li>
+                `).join('');
+            } catch (e) {
+                console.error("Leaderboard fetch failed");
+            }
+        }
+
+        // Initial Load
+        updateLeaderboard();
+        // Refresh every 10 seconds
+        setInterval(updateLeaderboard, 10000);
+    </script>
+</body>
+</html>
