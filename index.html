@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripJack Expert Challenge</title>
+    <style>
+        :root { --tj-blue: #00529b; --tj-orange: #f37021; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        #quiz-container { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; border-top: 8px solid var(--tj-blue); }
+        .logo { font-weight: bold; color: var(--tj-blue); font-size: 24px; margin-bottom: 10px; }
+        .logo span { color: var(--tj-orange); }
+        #timer { font-size: 1.2rem; color: #e74c3c; font-weight: bold; margin-bottom: 20px; }
+        .option { display: block; width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.3s; background: none; font-size: 16px; }
+        .option:hover { border-color: var(--tj-blue); background: #f0f7ff; }
+        .hidden { display: none; }
+        #result-btn { background: var(--tj-orange); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 18px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="quiz-container">
+    <div class="logo">Trip<span>Jack</span> Quiz</div>
+    <div id="quiz-content">
+        <div id="timer">Time Left: <span id="time">20</span>s</div>
+        <h3 id="question">Loading...</h3>
+        <div id="options"></div>
+    </div>
+    
+    <div id="result-screen" class="hidden">
+        <h2>Quiz Complete!</h2>
+        <p style="font-size: 48px; margin: 10px 0;">🎯 <span id="final-score">0</span>/5</p>
+        <p id="reward-msg"></p>
+        <button id="result-btn" onclick="location.reload()">Try Again</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "How many airlines are available on TripJack?", a: ["500+", "750+", "900+", "1000+"], correct: 1 },
+        { q: "Which guarantee ensures no hotel check-in issues?", a: ["Price Lock", "Check-In Guarantee", "TJ Secure", "Hotel Guard"], correct: 1 },
+        { q: "What is TripJack's primary focus for agents?", a: ["Only Flights", "One-stop Tech Solution", "Offline Bookings", "Social Media"], correct: 1 },
+        { q: "Can you manage cancellations in 'One-Click'?", a: ["Yes", "No", "Only for Hotels", "Only for Flights"], correct: 0 },
+        { q: "Which cities does TripJack empower specifically?", a: ["Metro Only", "Tier-2 & Tier-3", "International only", "None"], correct: 1 }
+    ];
+
+    let currentQ = 0; let score = 0; let timeLeft = 20; let timer;
+
+    function startTimer() {
+        timer = setInterval(() => {
+            timeLeft--;
+            document.getElementById('time').innerText = timeLeft;
+            if (timeLeft <= 0) endQuiz();
+        }, 1000);
+    }
+
+    function loadQuestion() {
+        if (currentQ >= quizData.length) return endQuiz();
+        const data = quizData[currentQ];
+        document.getElementById('question').innerText = data.q;
+        const optionsDiv = document.getElementById('options');
+        optionsDiv.innerHTML = '';
+        data.a.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'option';
+            btn.innerText = opt;
+            btn.onclick = () => { if(i === data.correct) score++; currentQ++; loadQuestion(); };
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    function endQuiz() {
+        clearInterval(timer);
+        document.getElementById('quiz-content').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = score;
+        const msg = score >= 4 ? "🔥 AMAZING! Show this to get 2 SPINS!" : "Good job! Show this to get 1 SPIN!";
+        document.getElementById('reward-msg').innerText = msg;
+    }
+
+    loadQuestion();
+    startTimer();
+</script>
+</body>
+</html>
