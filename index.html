@@ -92,7 +92,7 @@
             if(quizData.error) throw new Error();
             document.getElementById('start-btn').disabled = false;
             document.getElementById('start-btn').innerText = "START QUIZ";
-            document.getElementById('loading-msg').innerText = "Question Bank Ready!";
+            document.getElementById('loading-msg').innerText = "Are You Ready?";
         } catch (e) {
             document.getElementById('loading-msg').innerText = "Sync Error. Please refresh the page.";
             document.getElementById('loading-msg').style.color = "red";
@@ -191,3 +191,4 @@
 </script>
 </body>
 </html>
+
