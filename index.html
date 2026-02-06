@@ -8,7 +8,7 @@
         :root { --tj-blue: #00529b; --tj-orange: #f37021; --correct: #27ae60; --incorrect: #e74c3c; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         
-        #main-card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); width: 90%; max-width: 450px; text-align: center; border-top: 10px solid var(--tj-blue); position: relative; min-height: 550px; }
+        #main-card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); width: 90%; max-width: 450px; text-align: center; border-top: 10px solid var(--tj-blue); position: relative; min-height: 550px; display: flex; flex-direction: column; justify-content: center; }
         
         .logo { font-weight: bold; color: var(--tj-blue); font-size: 32px; margin-bottom: 10px; }
         .logo span { color: var(--tj-orange); }
@@ -18,22 +18,23 @@
         .timer-low { color: var(--incorrect) !important; animation: panic 0.4s infinite; }
         @keyframes panic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
-        input, select { width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--tj-blue); }
 
         /* OPTIONS STYLING */
-        .option { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; cursor: pointer; transition: 0.2s; background: #fff; font-size: 17px; font-weight: 500; }
+        .option { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; cursor: pointer; transition: 0.2s; background: #fff; font-size: 17px; font-weight: 500; text-align: center; }
         .option.correct-glow { background: var(--correct) !important; color: white; border-color: var(--correct); }
         .option.incorrect-glow { background: var(--incorrect) !important; color: white; border-color: var(--incorrect); }
         .option:disabled { cursor: default; }
 
-        #feedback-text { font-weight: bold; margin: 10px 0; min-height: 24px; }
+        #feedback-text { font-weight: bold; margin: 10px 0; min-height: 24px; font-size: 18px; }
         .hidden { display: none !important; }
         
-        .tj-btn { background: var(--tj-orange); color: white; border: none; padding: 18px 30px; border-radius: 35px; font-weight: bold; cursor: pointer; font-size: 18px; width: 100%; margin-top: 10px; box-shadow: 0 5px 15px rgba(243, 112, 33, 0.3); }
-        .tj-btn:disabled { background: #ccc; }
+        .tj-btn { background: var(--tj-orange); color: white; border: none; padding: 18px 30px; border-radius: 35px; font-weight: bold; cursor: pointer; font-size: 18px; width: 100%; margin-top: 10px; box-shadow: 0 5px 15px rgba(243, 112, 33, 0.3); text-transform: uppercase; }
+        .tj-btn:disabled { background: #ccc; box-shadow: none; }
 
         #countdown-number { font-size: 120px; font-weight: 900; color: var(--tj-blue); }
-        #question-text { font-size: 20px; color: #2c3e50; margin-bottom: 20px; font-weight: 600; }
+        #question-text { font-size: 20px; color: #2c3e50; margin-bottom: 20px; font-weight: 600; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -46,7 +47,7 @@
         <p>Prove your knowledge & win big!</p>
         <input type="text" id="agentName" placeholder="Full Name">
         <input type="email" id="agentEmail" placeholder="Email ID">
-        <input type="text" id="agencyId" placeholder="Agency ID (Optional)">
+        <input type="text" id="agencyId" placeholder="Agency ID">
         <button class="tj-btn" id="start-btn" onclick="runCountdown()" disabled>Loading...</button>
     </div>
 
@@ -65,16 +66,18 @@
     <div id="spin-screen" class="hidden">
         <h2 style="color: var(--correct);">Quiz Complete!</h2>
         <p>Your Score: <span id="final-score" style="font-weight:bold; font-size: 24px;"></span>/5</p>
-        <div style="background: #f0f7ff; padding: 20px; border-radius: 15px; margin: 20px 0;">
+        <div style="background: #f0f7ff; padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid #d0e7ff;">
             <p style="color: var(--tj-blue); font-weight: bold; margin:0;">GO TO THE WHEEL NOW!</p>
-            <p style="font-size: 14px;">Once you spin, enter your prize below:</p>
+            <p style="font-size: 14px; color: #555;">Once you spin, enter your prize below:</p>
             <select id="spinPrize">
                 <option value="">-- Select Your Prize --</option>
-                <option value="100 TJ Cash">100 TJ Cash</option>
-                <option value="200 TJ Cash">200 TJ Cash</option>
-                <option value="500 TJ Cash">500 TJ Cash</option>
-                <option value="TripJack Goodies">TripJack Goodies</option>
-                <option value="Better luck next time">Better luck next time</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="300">300</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+                <option value="2000">2000</option>
+                <option value="Better Luck Next Time">Better Luck Next Time</option>
             </select>
         </div>
         <button class="tj-btn" id="claim-btn" onclick="submitSpin()">CLAIM REWARD</button>
@@ -82,43 +85,55 @@
 
     <div id="thanks-screen" class="hidden">
         <h2 style="color: var(--tj-blue);">Thank You!</h2>
-        <p>Your reward has been logged.</p>
-        <div style="font-size: 60px;">🎁</div>
+        <p>Your reward has been logged in the system.</p>
+        <div style="font-size: 80px; margin: 20px 0;">🎉</div>
         <button class="tj-btn" onclick="window.location.reload()">NEXT AGENT</button>
     </div>
 </div>
 
 <script>
+    // Replace with your actual deployed Google Web App URL
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyLoMA6vMbfdFT4OM6hHyCJORbm9-Vw7-k7iPNT3_BsaN-bjkK1yqNdp0JQGIqUvUdW/exec';
     
     let quizData = [], currentQ = 0, score = 0, timeLeft = 60, timerInterval, entryId = "";
     let agentName, agentEmail, agencyId;
 
+    // Fetch Questions from Google Sheet (doGet)
     async function fetchQuestions() {
         try {
             const response = await fetch(SCRIPT_URL);
             quizData = await response.json();
             document.getElementById('start-btn').disabled = false;
             document.getElementById('start-btn').innerText = "START QUIZ";
-        } catch (e) { alert("Failed to load questions. Check internet."); }
+        } catch (e) { 
+            console.error(e);
+            alert("Connection error. Please refresh the page."); 
+        }
     }
     fetchQuestions();
 
     function runCountdown() {
-        agentName = document.getElementById('agentName').value;
-        agentEmail = document.getElementById('agentEmail').value;
-        agencyId = document.getElementById('agencyId').value || "N/A";
+        agentName = document.getElementById('agentName').value.trim();
+        agentEmail = document.getElementById('agentEmail').value.trim();
+        agencyId = document.getElementById('agencyId').value.trim();
 
-        if(!agentName || !agentEmail) { alert("Fill Name & Email!"); return; }
+        if(!agentName || !agentEmail || !agencyId) { 
+            alert("Please fill in all fields (Name, Email, and Agency ID) to start!"); 
+            return; 
+        }
 
         document.getElementById('lead-screen').classList.add('hidden');
         document.getElementById('countdown-screen').classList.remove('hidden');
+        
         let count = 3;
         const countInt = setInterval(() => {
             count--;
             if (count > 0) document.getElementById('countdown-number').innerText = count;
             else if (count === 0) document.getElementById('countdown-number').innerText = "GO!";
-            else { clearInterval(countInt); startQuiz(); }
+            else { 
+                clearInterval(countInt); 
+                startQuiz(); 
+            }
         }, 1000);
     }
 
@@ -166,7 +181,7 @@
         } else {
             btn.classList.add('incorrect-glow');
             allBtns[correct].classList.add('correct-glow');
-            document.getElementById('feedback-text').innerText = "❌ Incorrect!";
+            document.getElementById('feedback-text').innerText = "❌ Oops! The right answer was: " + correctText;
             document.getElementById('feedback-text').style.color = "var(--incorrect)";
         }
         
@@ -180,40 +195,52 @@
         document.getElementById('spin-screen').classList.remove('hidden');
         document.getElementById('final-score').innerText = score;
 
-        // SAVE DATA FIRST (Stage 1)
-        const response = await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({ 
-                action: "saveScore", 
-                name: agentName, 
-                email: agentEmail, 
-                agencyId: agencyId, 
-                score: score 
-            })
-        });
-        const result = await response.json();
-        entryId = result.entryId; // Save ID for spin update
+        // Stage 1: Post initial lead and score
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    action: "saveScore", 
+                    name: agentName, 
+                    email: agentEmail, 
+                    agencyId: agencyId, 
+                    score: score 
+                })
+            });
+            const result = await response.json();
+            entryId = result.entryId; 
+        } catch (e) {
+            console.error("Save error:", e);
+        }
     }
 
     async function submitSpin() {
         const prize = document.getElementById('spinPrize').value;
-        if(!prize) { alert("Please select the prize won!"); return; }
+        if(!prize) { 
+            alert("Please select the prize won from the wheel!"); 
+            return; 
+        }
 
         document.getElementById('claim-btn').disabled = true;
-        document.getElementById('claim-btn').innerText = "Saving...";
+        document.getElementById('claim-btn').innerText = "SAVING REWARD...";
 
-        // UPDATE SPIN (Stage 2)
-        await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({ 
-                action: "updateSpin", 
-                entryId: entryId, 
-                prize: prize 
-            })
-        });
-
-        document.getElementById('spin-screen').classList.add('hidden');
-        document.getElementById('thanks-screen').classList.remove('hidden');
+        // Stage 2: Update row with spin result
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    action: "updateSpin", 
+                    entryId: entryId, 
+                    prize: prize 
+                })
+            });
+            document.getElementById('spin-screen').classList.add('hidden');
+            document.getElementById('thanks-screen').classList.remove('hidden');
+        } catch (e) {
+            alert("Error saving spin. Please check connection.");
+            document.getElementById('claim-btn').disabled = false;
+            document.getElementById('claim-btn').innerText = "CLAIM REWARD";
+        }
     }
 </script>
 </body>
