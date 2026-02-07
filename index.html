@@ -3,24 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TripJack Expert Challenge</title>
+    <title>TripJack Expert Challenge | OTM 2026</title>
     <style>
         :root { --tj-blue: #00529b; --tj-orange: #f37021; --correct: #27ae60; --incorrect: #e74c3c; }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        #main-card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); width: 90%; max-width: 450px; text-align: center; border-top: 10px solid var(--tj-blue); min-height: 500px; display: flex; flex-direction: column; justify-content: center; }
+        
+        #main-card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); width: 90%; max-width: 450px; text-align: center; border-top: 10px solid var(--tj-blue); position: relative; min-height: 520px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
+        
         .logo { font-weight: bold; color: var(--tj-blue); font-size: 32px; margin-bottom: 10px; }
         .logo span { color: var(--tj-orange); }
-        #timer { font-size: 80px; font-weight: 900; color: #333; line-height: 1; margin-bottom: 10px; }
+        
+        #timer { font-size: 80px; font-weight: 900; color: #333; line-height: 1; margin-bottom: 15px; }
         .timer-low { color: var(--incorrect) !important; animation: panic 0.4s infinite; }
         @keyframes panic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
         input { width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--tj-blue); }
+
         .option { display: block; width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; cursor: pointer; transition: 0.2s; background: #fff; font-size: 17px; font-weight: 500; text-align: center; }
         .option.correct-glow { background: var(--correct) !important; color: white; border-color: var(--correct); }
         .option.incorrect-glow { background: var(--incorrect) !important; color: white; border-color: var(--incorrect); }
-        #feedback-text { font-weight: bold; margin: 10px 0; min-height: 24px; font-size: 18px; line-height: 1.4; }
+        .option:disabled { opacity: 0.8; cursor: not-allowed; }
+
+        #feedback-text { font-weight: bold; margin: 15px 0; min-height: 24px; font-size: 18px; line-height: 1.4; }
         .hidden { display: none !important; }
+        
         .tj-btn { background: var(--tj-orange); color: white; border: none; padding: 18px 30px; border-radius: 35px; font-weight: bold; cursor: pointer; font-size: 18px; width: 100%; margin-top: 10px; box-shadow: 0 5px 15px rgba(243, 112, 33, 0.3); text-transform: uppercase; }
-        #question-text { font-size: 20px; color: #2c3e50; margin-bottom: 20px; font-weight: 600; line-height: 1.4; }
+        .tj-btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        #question-text { font-size: 20px; color: #2c3e50; margin-bottom: 20px; font-weight: 600; line-height: 1.4; text-align: left; }
         .salman-box { background: #f0f7ff; padding: 20px; border-radius: 15px; border: 2px dashed var(--tj-blue); margin-top: 20px; }
     </style>
 </head>
@@ -35,7 +46,8 @@
         <input type="text" id="agentName" placeholder="Full Name">
         <input type="email" id="agentEmail" placeholder="Email ID">
         <input type="text" id="agencyId" placeholder="Agency ID">
-        <button class="tj-btn" id="start-btn" onclick="runCountdown()" disabled>Loading...</button>
+        <button class="tj-btn" id="start-btn" onclick="runCountdown()" disabled>Connecting...</button>
+        <p id="status-msg" style="font-size: 12px; margin-top: 10px; color: #666;">Waiting for question bank...</p>
     </div>
 
     <div id="countdown-screen" class="hidden">
@@ -47,60 +59,93 @@
         <div id="question-text"></div>
         <div id="options-container"></div>
         <div id="feedback-text"></div>
-        <button id="next-btn" class="tj-btn hidden" onclick="loadQuestion()">NEXT QUESTION</button>
+        <button id="next-btn" class="tj-btn hidden" onclick="loadQuestion()">Next Question</button>
     </div>
 
     <div id="result-screen" class="hidden">
         <h2 style="color: var(--correct);">Challenge Complete!</h2>
-        <div style="font-size: 80px; font-weight: 900; color: var(--tj-blue); margin: 10px 0;"><span id="final-score">0</span><span style="font-size:30px; color:#ccc;">/5</span></div>
-        
-        <div class="salman-box">
-            <p style="color: var(--tj-blue); font-weight: bold; font-size: 18px; margin: 0;">GREAT JOB!</p>
-            <p style="font-size: 16px; margin: 10px 0; color: #333;">Show this screen to <strong>Salman</strong> for claiming your spin.</p>
+        <div style="font-size: 80px; font-weight: 900; color: var(--tj-blue); margin: 10px 0;">
+            <span id="final-score">0</span><span style="font-size:30px; color:#ccc;">/5</span>
         </div>
         
-        <button class="tj-btn" style="margin-top: 30px;" onclick="window.location.reload()">NEXT AGENT</button>
+        <div class="salman-box">
+            <p style="color: var(--tj-blue); font-weight: bold; font-size: 18px; margin: 0;">SHOW THIS SCREEN</p>
+            <p style="font-size: 16px; margin: 10px 0; color: #333;">Show this to <strong>Salman</strong> to claim your spin!</p>
+        </div>
+        
+        <button class="tj-btn" style="margin-top: 30px;" onclick="window.location.reload()">Reset for Next Agent</button>
     </div>
 </div>
 
 <script>
+    // --- CONFIGURATION ---
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyLoMA6vMbfdFT4OM6hHyCJORbm9-Vw7-k7iPNT3_BsaN-bjkK1yqNdp0JQGIqUvUdW/exec';
     
-    let quizData = [], currentQ = 0, score = 0, timeLeft = 60, timerInterval;
+    let quizData = [];
+    let currentQ = 0;
+    let score = 0;
+    let timeLeft = 60;
+    let timerInterval;
     let agentName, agentEmail, agencyId;
 
+    // --- 1. INITIALIZATION: FETCH QUESTIONS ---
     async function fetchQuestions() {
+        const btn = document.getElementById('start-btn');
+        const msg = document.getElementById('status-msg');
         try {
             const response = await fetch(SCRIPT_URL);
             quizData = await response.json();
-            document.getElementById('start-btn').disabled = false;
-            document.getElementById('start-btn').innerText = "START QUIZ";
-        } catch (e) { alert("Failed to load questions. Refresh page."); }
+            
+            if (quizData && quizData.length > 0) {
+                btn.disabled = false;
+                btn.innerText = "START QUIZ";
+                msg.innerText = "Ready to play!";
+                msg.style.color = "var(--correct)";
+            } else {
+                throw new Error("Empty Bank");
+            }
+        } catch (e) {
+            msg.innerText = "Connection slow. Retrying...";
+            msg.style.color = "orange";
+            setTimeout(fetchQuestions, 3000); // Auto-retry
+        }
     }
     fetchQuestions();
 
+    // --- 2. START SEQUENCE ---
     function runCountdown() {
         agentName = document.getElementById('agentName').value.trim();
         agentEmail = document.getElementById('agentEmail').value.trim();
         agencyId = document.getElementById('agencyId').value.trim();
 
-        if(!agentName || !agentEmail || !agencyId) { alert("Fill all fields!"); return; }
+        if(!agentName || !agentEmail || !agencyId) { 
+            alert("Please fill in all details to proceed!"); 
+            return; 
+        }
 
         document.getElementById('lead-screen').classList.add('hidden');
         document.getElementById('countdown-screen').classList.remove('hidden');
+        
         let count = 3;
         const countInt = setInterval(() => {
             count--;
-            if (count > 0) document.getElementById('countdown-number').innerText = count;
-            else if (count === 0) document.getElementById('countdown-number').innerText = "GO!";
-            else { clearInterval(countInt); startQuiz(); }
+            if (count > 0) {
+                document.getElementById('countdown-number').innerText = count;
+            } else if (count === 0) {
+                document.getElementById('countdown-number').innerText = "GO!";
+            } else {
+                clearInterval(countInt);
+                startQuiz();
+            }
         }, 1000);
     }
 
+    // --- 3. QUIZ ENGINE ---
     function startQuiz() {
         document.getElementById('countdown-screen').classList.add('hidden');
         document.getElementById('quiz-screen').classList.remove('hidden');
         loadQuestion();
+        
         timerInterval = setInterval(() => {
             timeLeft--;
             document.getElementById('timer').innerText = timeLeft;
@@ -110,18 +155,22 @@
     }
 
     function loadQuestion() {
+        // Safety Catch: Check if we are at the end
         if (currentQ >= quizData.length) {
             endQuiz();
             return;
         }
-        
-        document.getElementById('next-btn').classList.add('hidden');
+
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.classList.add('hidden');
+        nextBtn.disabled = false; // Reset button state
         document.getElementById('feedback-text').innerText = "";
         
         const data = quizData[currentQ];
-        document.getElementById('question-text').innerText = data.q;
+        document.getElementById('question-text').innerText = (currentQ + 1) + ". " + data.q;
+        
         const container = document.getElementById('options-container');
-        container.innerHTML = '';
+        container.innerHTML = ''; // Clear previous options
         
         data.a.forEach((opt, i) => {
             const btn = document.createElement('button');
@@ -133,32 +182,37 @@
     }
 
     function checkAnswer(selected, correct, correctText, btn) {
+        // Disable all buttons immediately to prevent double-taps
         const allBtns = document.querySelectorAll('.option');
         allBtns.forEach(b => b.disabled = true);
+        
+        const feedback = document.getElementById('feedback-text');
         
         if(selected === correct) {
             score++;
             btn.classList.add('correct-glow');
-            document.getElementById('feedback-text').innerText = "✅ Correct!";
-            document.getElementById('feedback-text').style.color = "var(--correct)";
+            feedback.innerText = "✅ Correct!";
+            feedback.style.color = "var(--correct)";
         } else {
             btn.classList.add('incorrect-glow');
-            allBtns[correct].classList.add('correct-glow');
-            document.getElementById('feedback-text').innerText = "❌ Incorrect! Answer: " + correctText;
-            document.getElementById('feedback-text').style.color = "var(--incorrect)";
+            // Highlight the correct one
+            if(allBtns[correct]) allBtns[correct].classList.add('correct-glow');
+            feedback.innerText = "❌ Incorrect! Answer: " + correctText;
+            feedback.style.color = "var(--incorrect)";
         }
         
-        currentQ++; // Increment safely
+        currentQ++; // Increment index
         document.getElementById('next-btn').classList.remove('hidden');
     }
 
+    // --- 4. END SEQUENCE ---
     function endQuiz() {
         clearInterval(timerInterval);
         document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.remove('hidden');
         document.getElementById('final-score').innerText = score;
 
-        // Final Save
+        // POST DATA TO GOOGLE SHEETS
         fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
@@ -168,7 +222,7 @@
                 agencyId: agencyId, 
                 score: score 
             })
-        });
+        }).catch(err => console.log("Save failed, but UI continues."));
     }
 </script>
 </body>
